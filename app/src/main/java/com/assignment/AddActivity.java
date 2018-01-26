@@ -31,8 +31,9 @@ public class AddActivity extends AppCompatActivity {
         inItViews();
         getSupportActionBar().setTitle("Add Employee");
 
-        // get Database object
+        // get Database reference
         dbHelper = CommonUtilities.getDBObject(this);
+        // set onclick listener on save button
         mSaveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -45,6 +46,7 @@ public class AddActivity extends AppCompatActivity {
         });
     }
 
+    // init all views
     private void inItViews() {
         Log.d(TAG, "inItViews: ");
         mNameEt = (EditText) findViewById(R.id.edit_text_name);
@@ -53,6 +55,7 @@ public class AddActivity extends AppCompatActivity {
         mSaveBtn = (Button) findViewById(R.id.button_save);
     }
 
+    // this method will validate and save all values
     private void validateAndSave(String name, String age, String address) {
         Log.d(TAG, "validateAndSave: ");
         if (name.equalsIgnoreCase("")) {
@@ -69,8 +72,7 @@ public class AddActivity extends AppCompatActivity {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    long result = dbHelper.insertContentVals(Constants.EMPLOYEE_TABLE, contentValues);
-
+                    long result = dbHelper.insertContentVals(Constants.EMPLOYEE_TABLE, contentValues); // insert all values
                 }
             }).start();
 

@@ -36,18 +36,22 @@ public class ViewActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate: ");
+        // init layout
         setContentView(R.layout.activity_view);
+        // init all views
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_View_employee);
         mStatusTv = (TextView) findViewById(R.id.textview_no_result);
-        dbHelper = CommonUtilities.getDBObject(this);
+        dbHelper = CommonUtilities.getDBObject(this); // get database reference
+        // set actionbar tittle
         getSupportActionBar().setTitle("Employee Details");
-        empViewAdapter = new EmpViewAdapter();
+        empViewAdapter = new EmpViewAdapter(); // create adapter instance
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.addItemDecoration(new RecyclerViewItemDecorator(this, 0));
-        mRecyclerView.setAdapter(empViewAdapter);
-        registerForContextMenu(mRecyclerView);
+        mRecyclerView.setAdapter(empViewAdapter); // set adapter to recycler view
+        registerForContextMenu(mRecyclerView); // register for Context menu
     }
 
     @Override
@@ -55,7 +59,7 @@ public class ViewActivity extends AppCompatActivity {
         super.onStart();
         new Thread(new Runnable() {
             public void run() {
-                emp = dbHelper.getEmployeeDetails(); // Creating object
+                emp = dbHelper.getEmployeeDetails(); // get Employee details. this has to call within new thread
                 updateUi(emp);
             }
         }).start();
@@ -68,7 +72,7 @@ public class ViewActivity extends AppCompatActivity {
                 if (emp.size() == 0) {
                     mRecyclerView.setVisibility(View.INVISIBLE);
                     Log.d(TAG, "run: ");
-                } else {
+                } else { // if records found update ui
                     Log.d(TAG, "total records : " + emp.size());
                     mStatusTv.setVisibility(View.INVISIBLE);
                     empViewAdapter.updateEmpRecords(emp);
@@ -78,6 +82,7 @@ public class ViewActivity extends AppCompatActivity {
         });
     }
 
+    // This call back will call at the time of creating context menu
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
@@ -85,6 +90,7 @@ public class ViewActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.ed_menu, menu);
     }
 
+    // handle contextmenu item select event
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         Employee editEmplolyee = emp.get(empViewAdapter.getPosition());
@@ -94,15 +100,15 @@ public class ViewActivity extends AppCompatActivity {
             intent.putExtra("NAME", editEmplolyee.getName());
             intent.putExtra("AGE", editEmplolyee.getAge());
             intent.putExtra("ADDRESS", editEmplolyee.getAddress());
-            startActivityForResult(intent, 1);
+            startActivityForResult(intent, 1);                  // start EditActivity
             Log.d(TAG, "onContextItemSelected: " + editEmplolyee.getName());
         } else if (item.getItemId() == R.id.menu_delete) {
             String id = "" + editEmplolyee.getId();
-            boolean result = dbHelper.deleteRecords(id);
+            boolean result = dbHelper.deleteRecords(id);  // delete employee details from datase with employee id
             if (result) {
                 Toast.makeText(this, "Record Deleted", Toast.LENGTH_SHORT).show();
-                emp = dbHelper.getEmployeeDetails();
-                empViewAdapter.updateEmpRecords(emp);
+                emp = dbHelper.getEmployeeDetails(); // get remaining records
+                empViewAdapter.updateEmpRecords(emp); // update records to adapter
                 empViewAdapter.notifyDataSetChanged();
             }
         }
